@@ -4,6 +4,7 @@ import SearchBar from "./components/search_bar";
 import YTSearch from "youtube-api-search";
 import VideoList from './components/video_list';
 import VideoDetail from './components/video_detail';
+import _ from 'lodash';
 
 const API_KEY = "AIzaSyBk2uu1qE6ZAdX8l1EkRZwgwtwImDo81i8";
 
@@ -11,20 +12,39 @@ const API_KEY = "AIzaSyBk2uu1qE6ZAdX8l1EkRZwgwtwImDo81i8";
 class App extends Component {
   constructor(props){
     super(props);
-    this.state = { videos: []};
+    this.state = {
+       videos: [],
+       selectedVideo: null, 
+       searchingKey : null
+       };
+    this.videoSearch('react');   
+  }
 
-    YTSearch({ key: API_KEY, term: "reactjs tutorial" },  videos => {
-      this.setState( { videos });
+  videoSearch(term){
+    console.log('Looking w22 ' + term +" "+ JSON.stringify( term));
+    
+    YTSearch({ key: API_KEY, term: term }, videos => {
+      this.setState({
+        videos: videos,
+        selectedVideo: null
+      });
       console.log(videos);
     });
   }
-
   render() {
+    const videoSearch1 = _.debounce( (term) => {this.videoSearch(term)} , 500 );
+
     return (
       <div>
-        <SearchBar />
-        <VideoDetail video={this.state.videos[0]} />
-        <VideoList videos={this.state.videos} />
+        <SearchBar 
+          onSearchingKey={searchingKey => videoSearch1( searchingKey )}
+         />
+
+        <VideoDetail video={this.state.selectedVideo} />
+        <VideoList 
+          onVideoSelected={selectedVideo => this.setState({ selectedVideo }) }
+          
+        videos={this.state.videos} />
       </div>
     );
   }
